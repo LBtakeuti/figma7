@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flick - デジタルエージェンシー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
+            line-height: 1.8;
+            color: #000;
+            background-color: #ffffff;
+            overflow-x: hidden;
+            opacity: 0;
+            animation: bodyFadeIn 0.5s ease forwards;
+        }
+
+        @keyframes bodyFadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Loading Screen */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-inner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Fade In Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Animation Classes */
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .animate-fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .animate-on-scroll.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stagger-animation {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .stagger-animation.animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 30px 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            animation: fadeIn 1s ease 0.5s forwards;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 180px 0 100px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-size: clamp(48px, 8vw, 120px);
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -3px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease 0.8s forwards;
+        }
+
+        .hero h1 span {
+            display: inline-block;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero h1 span:nth-child(1) { animation-delay: 0.8s; }
+        .hero h1 span:nth-child(2) { animation-delay: 0.9s; }
+        .hero h1 span:nth-child(3) { animation-delay: 1.0s; }
+        .hero h1 span:nth-child(4) { animation-delay: 1.1s; }
+
+        .hero-subtitle {
+            max-width: 500px;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 60px;
+            opacity: 0;
+            animation: fadeIn 1s ease 1.4s forwards;
+        }
+
+        .hero-nav {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            animation: fadeIn 1s ease 1.6s forwards;
+        }
+
+        .nav-dot {
+            width: 40px;
+            height: 2px;
+            background: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-dot.active {
+            background: #000;
+        }
+
+        /* Projects Section */
+        .projects {
+            padding: 100px 0;
+        }
+
+        .project {
+            margin-bottom: 120px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .project.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project:nth-child(even) {
+            direction: rtl;
+        }
+
+        .project:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .project-image {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            aspect-ratio: 4/3;
+        }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s;
+            opacity: 0;
+            animation: scaleIn 1s ease forwards;
+            animation-delay: 0.3s;
+        }
+
+        .project:hover .project-image img {
+            transform: scale(1.05);
+        }
+
+        .project-content {
+            padding: 40px 0;
+        }
+
+        .project-number {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .project-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .project-description {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .project-link {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #000;
+            text-decoration: none;
+            padding-bottom: 2px;
+            border-bottom: 2px solid #000;
+            transition: transform 0.2s;
+        }
+
+        .project-link:hover {
+            transform: translateX(5px);
+        }
+
+        /* Team Section */
+        .team-intro {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .team-names {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+
+        .team-name {
+            font-size: clamp(36px, 6vw, 80px);
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            line-height: 0.9;
+            opacity: 0;
+            transform: translateX(-100px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .team-name.animate-in {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Process Section */
+        .process {
+            padding: 100px 0;
+            background: #f8f8f8;
+        }
+
+        .process h2 {
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 80px;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+        }
+
+        .process h2.animate-on-scroll,
+        .brands h2.animate-on-scroll,
+        .footer-content h2.animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .process h2.animate-in,
+        .brands h2.animate-in,
+        .footer-content h2.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .process-item {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            transition: transform 0.3s;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .process-item.animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .process-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .process-number {
+            font-size: 48px;
+            font-weight: 900;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .process-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .process-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Brands Section */
+        .brands {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .brands h2 {
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 900;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+
+        .brand-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: transform 0.3s;
+            color: white;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .brand-item.animate-in {
+            animation: brandPop 0.5s ease forwards;
+        }
+
+        @keyframes brandPop {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .brand-item:hover {
+            transform: scale(1.1);
+        }
+
+        .brand-item:nth-child(1) { background: #FFD93D; }
+        .brand-item:nth-child(2) { background: #6BCF7F; }
+        .brand-item:nth-child(3) { background: #FF6B6B; }
+        .brand-item:nth-child(4) { background: #4ECDC4; }
+        .brand-item:nth-child(5) { background: #95E1D3; }
+        .brand-item:nth-child(6) { background: #FFA502; }
+        .brand-item:nth-child(7) { background: #3742FA; }
+        .brand-item:nth-child(8) { background: #A29BFE; }
+
+        .brands-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .stat-item {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .stat-item.animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Team Bio Section */
+        .team-bio {
+            padding: 100px 0;
+            background: #f8f8f8;
+        }
+
+        .bio-card {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 60px;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 12px;
+        }
+
+        .bio-card.animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .bio-card.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bio-image {
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .bio-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%);
+        }
+
+        .bio-content h3 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .bio-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .bio-signature {
+            font-style: italic;
+            color: #999;
+            margin-top: 30px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 100px 0 40px;
+            background: #000;
+            color: white;
+        }
+
+        .footer-content {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .footer-content h2 {
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 900;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto 80px;
+            text-align: left;
+        }
+
+        .faq-item {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .faq-item.animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .faq-item h4 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .faq-item p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #999;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 40px;
+            border-top: 1px solid #333;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-links a {
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .project {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .project:nth-child(even) {
+                direction: ltr;
+            }
+
+            .process-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .brands-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bio-card {
+                grid-template-columns: 1fr;
+                padding: 40px;
+            }
+
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-inner"></div>
+    </div>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">Flick</div>
+            <button class="menu-btn">メニュー</button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>
+                <span>Stunning</span><br>
+                <span>Brands &</span><br>
+                <span>Digital</span><br>
+                <span>Experiences</span>
+            </h1>
+            <p class="hero-subtitle">
+                Flickは独立系ブランディング・デジタルエクスペリエンス
+                スタジオです。野心的なブランドや人々とパートナーシップを組み、
+                文化を形成し、大胆なブランドエクイティを提供する
+                革新的な作品を創造します。
+            </p>
+            <div class="hero-nav">
+                <button class="nav-dot active"></button>
+                <button class="nav-dot"></button>
+                <button class="nav-dot"></button>
+                <button class="nav-dot"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section class="projects">
+        <div class="container">
+            <article class="project">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop" alt="Architecture Project">
+                </div>
+                <div class="project-content">
+                    <div class="project-number">01 / 建築</div>
+                    <h2 class="project-title">Modern Living</h2>
+                    <p class="project-description">
+                        思慮深いデザインと革新的な建築ソリューションを通じて、
+                        日常体験を刺激し、向上させる空間を創造します。
+                    </p>
+                    <a href="#" class="project-link">プロジェクトを見る →</a>
+                </div>
+            </article>
+
+            <article class="project">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop" alt="Interior Design">
+                </div>
+                <div class="project-content">
+                    <div class="project-number">02 / インテリア</div>
+                    <h2 class="project-title">Workspace Flow</h2>
+                    <p class="project-description">
+                        オフィスを創造性が流れ、コラボレーションが自然に
+                        育まれる生産的な聖域へと変革します。
+                    </p>
+                    <a href="#" class="project-link">プロジェクトを見る →</a>
+                </div>
+            </article>
+
+            <article class="project">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop" alt="Corporate Building">
+                </div>
+                <div class="project-content">
+                    <div class="project-number">03 / 企業建築</div>
+                    <h2 class="project-title">Sky Tower</h2>
+                    <p class="project-description">
+                        持続可能なデザインと人間中心の建築で
+                        企業の景観を再定義し、時の試練に耐える建築を実現。
+                    </p>
+                    <a href="#" class="project-link">プロジェクトを見る →</a>
+                </div>
+            </article>
+
+            <article class="project">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&h=600&fit=crop" alt="Urban Planning">
+                </div>
+                <div class="project-content">
+                    <div class="project-number">04 / 都市計画</div>
+                    <h2 class="project-title">City Vision</h2>
+                    <p class="project-description">
+                        持続可能な生活とコミュニティ参画のための統合ソリューションで
+                        明日の都市をマスタープランニング。
+                    </p>
+                    <a href="#" class="project-link">プロジェクトを見る →</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Team Introduction -->
+    <section class="team-intro">
+        <div class="container">
+            <div class="team-names">
+                <div class="team-name">Hunter Yeany</div>
+                <div class="team-name">Veloce</div>
+                <div class="team-name">Walker</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process">
+        <div class="container">
+            <h2>洗練された<br>プロセス</h2>
+            <div class="process-grid">
+                <div class="process-item">
+                    <div class="process-number">01</div>
+                    <h3 class="process-title">リサーチ</h3>
+                    <p class="process-description">
+                        ブランド、市場、オーディエンスを深く掘り下げ、
+                        戦略的意思決定を推進するインサイトを明らかにします。
+                    </p>
+                </div>
+                <div class="process-item">
+                    <div class="process-number">02</div>
+                    <h3 class="process-title">戦略</h3>
+                    <p class="process-description">
+                        ビジネス目標と創造的卓越性を調整する
+                        包括的なロードマップを開発します。
+                    </p>
+                </div>
+                <div class="process-item">
+                    <div class="process-number">03</div>
+                    <h3 class="process-title">デザイン</h3>
+                    <p class="process-description">
+                        ターゲットオーディエンスに響く
+                        独特のビジュアルアイデンティティと体験を創造します。
+                    </p>
+                </div>
+                <div class="process-item">
+                    <div class="process-number">04</div>
+                    <h3 class="process-title">開発</h3>
+                    <p class="process-description">
+                        最先端のテクノロジーと完璧な実行で
+                        堅牢なデジタルソリューションを構築します。
+                    </p>
+                </div>
+                <div class="process-item">
+                    <div class="process-number">05</div>
+                    <h3 class="process-title">テスト</h3>
+                    <p class="process-description">
+                        すべてのプラットフォームとデバイスで完璧なパフォーマンスを
+                        保証する厳格な品質保証を実施します。
+                    </p>
+                </div>
+                <div class="process-item">
+                    <div class="process-number">06</div>
+                    <h3 class="process-title">ローンチ</h3>
+                    <p class="process-description">
+                        インパクトを最大化し、成果を達成するための
+                        戦略的展開と継続的な最適化を行います。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brands Section -->
+    <section class="brands">
+        <div class="container">
+            <h2>実績<br>ショーケース</h2>
+            <div class="brands-grid">
+                <div class="brand-item">A</div>
+                <div class="brand-item">B</div>
+                <div class="brand-item">C</div>
+                <div class="brand-item">D</div>
+                <div class="brand-item">E</div>
+                <div class="brand-item">F</div>
+                <div class="brand-item">G</div>
+                <div class="brand-item">H</div>
+            </div>
+            <div class="brands-stats">
+                <div class="stat-item">
+                    <div class="stat-number">150+</div>
+                    <div class="stat-label">プロジェクト</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">受賞歴</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">年の経験</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">満足度</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Bio Section -->
+    <section class="team-bio">
+        <div class="container">
+            <div class="bio-card">
+                <div class="bio-image">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop" alt="Team Member">
+                </div>
+                <div class="bio-content">
+                    <h3>私たちのストーリー</h3>
+                    <p>
+                        2012年に設立されたFlickは、大きな野心を持った小さなデザインスタジオとして
+                        スタートしました。優れたデザインがビジネスを変革し、ブランドと人々の間に
+                        意味のあるつながりを創造できると信じていました。
+                    </p>
+                    <p>
+                        現在、私たちは世界中の野心的なブランドと協働するストラテジスト、
+                        デザイナー、開発者のチームです。戦略的思考と創造的卓越性を組み合わせ、
+                        美しいだけでなく、実際の成果をもたらす作品を提供します。
+                    </p>
+                    <p>
+                        私たちのアプローチは協働的で、プロセスは思慮深く、品質へのコミットメントは
+                        揺るぎません。私たちは単なるエージェンシーではありません – 
+                        特別なものを構築するあなたの創造的パートナーです。
+                    </p>
+                    <p class="bio-signature">— Flickチーム</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <h2>よくある<br>ご質問</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h4>一般的なプロジェクトの期間は？</h4>
+                        <p>スコープと複雑さによりますが、ほとんどのプロジェクトは3～6ヶ月で完了します。</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>デザインプロセスは？</h4>
+                        <p>リサーチからローンチまでの6段階のプロセスを踏み、各段階で品質を保証します。</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>スタートアップとも仕事をしますか？</h4>
+                        <p>はい！野心的なスタートアップとの協働を愛し、特別パッケージをご用意しています。</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>開発も対応可能ですか？</h4>
+                        <p>もちろんです。デザインから開発、ローンチまでのエンドツーエンドソリューションを提供します。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-logo">Flick</div>
+                <div class="footer-links">
+                    <a href="#">実績</a>
+                    <a href="#">会社案内</a>
+                    <a href="#">お問い合わせ</a>
+                    <a href="#">ブログ</a>
+                </div>
+                <div class="social-links">
+                    <a href="#">Dribbble</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Loading screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1000);
+        });
+
+        // Navigation dots functionality
+        const dots = document.querySelectorAll('.nav-dot');
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                dots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // Add stagger delay for certain elements
+                    if (entry.target.classList.contains('stagger-animation')) {
+                        setTimeout(() => {
+                            entry.target.classList.add('animate-in');
+                        }, index * 100);
+                    } else {
+                        entry.target.classList.add('animate-in');
+                    }
+                    
+                    // Unobserve after animation
+                    if (!entry.target.classList.contains('keep-observing')) {
+                        observer.unobserve(entry.target);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Apply animations on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Projects animation
+            const projects = document.querySelectorAll('.project');
+            projects.forEach(project => {
+                observer.observe(project);
+            });
+
+            // Process items stagger animation
+            const processItems = document.querySelectorAll('.process-item');
+            processItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+                observer.observe(item);
+            });
+
+            // Brand items stagger animation
+            const brandItems = document.querySelectorAll('.brand-item');
+            brandItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.05}s`;
+                observer.observe(item);
+            });
+
+            // Team names slide in
+            const teamNames = document.querySelectorAll('.team-name');
+            teamNames.forEach((name, index) => {
+                name.style.transitionDelay = `${index * 0.2}s`;
+                observer.observe(name);
+            });
+
+            // Section headers
+            const sectionHeaders = document.querySelectorAll('.process h2, .brands h2, .footer-content h2');
+            sectionHeaders.forEach(header => {
+                header.classList.add('animate-on-scroll');
+                observer.observe(header);
+            });
+
+            // Bio card animation
+            const bioCard = document.querySelector('.bio-card');
+            if (bioCard) {
+                bioCard.classList.add('animate-on-scroll');
+                observer.observe(bioCard);
+            }
+
+            // FAQ items
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach((item, index) => {
+                item.classList.add('stagger-animation');
+                item.style.animationDelay = `${index * 0.1}s`;
+                observer.observe(item);
+            });
+
+            // Stats animation
+            const statItems = document.querySelectorAll('.stat-item');
+            statItems.forEach((item, index) => {
+                item.classList.add('stagger-animation');
+                item.style.animationDelay = `${index * 0.1}s`;
+                observer.observe(item);
+            });
+        });
+
+        // Parallax effect for hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero && scrolled < window.innerHeight) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+                hero.style.opacity = 1 - (scrolled / window.innerHeight);
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
